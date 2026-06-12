@@ -1,16 +1,16 @@
 /* ============================================================
- * mmltrc32.c  (CLI Pure ‰»EÅVƒGƒ“ƒWƒ““¯ŠúE-d ƒIƒvƒVƒ‡ƒ“”Å)
+ * mmltrc32.c  (MML Transposer ã‚³ãƒ³ã‚½ãƒ¼ãƒ« ã‚¢ãƒ—ãƒª 32bit CUIç‰ˆ)
  * ============================================================ */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "mmleng32.h"  /* Šm’èƒwƒbƒ_–¼ */
+#include "mmleng32.h"		//32bitãƒ˜ãƒƒãƒ€
 
 char text[MAX_TEXT];
 char outbuf[MAX_OUT];
 
-/* ®””»’è */
+/* æ•´æ•°åˆ¤å®š */
 int is_integer_arg(const char* s)
 {
     int i = 0;
@@ -30,76 +30,76 @@ int is_integer_arg(const char* s)
 
 void print_usage(void) {
     fprintf(stdout,
-        "g‚¢•û:\n"
+        "ä½¿ã„æ–¹:\n"
         "  mmltrc32 [options] <input.mml> [shift] [output.mml]\n"
         "\n"
-        "ƒIƒvƒVƒ‡ƒ“:\n"
-        "  -i <file>     “ü—Íƒtƒ@ƒCƒ‹\n"
-        "  -o <file>     o—Íƒtƒ@ƒCƒ‹\n"
-        "  -s <shift>    ˆÚ’²—Êi-12`+12j\n"
-        "  -p            Pure ƒ‚[ƒhi®Œ`‚È‚µj\n"
-        "  -f            FMT  ƒ‚[ƒhi®Œ`‚ ‚èj\n"
-        "  -r            ‘Š‘Î‰¹ˆæiæ“ª oXAˆÈ~ < >j\n"
-        "  -a            â‘Î‰¹ˆæi‘S‚Ä oXj\n"
-        "  -d            D ƒ`ƒƒƒ“ƒlƒ‹ˆÚ’²iƒmƒCƒYch‚àˆÚ’²j\n"
-        "  -h            Ú×ƒwƒ‹ƒv\n"
+        "ã‚ªãƒ—ã‚·ãƒ§ãƒ³:\n"
+        "  -i <file>     å…¥åŠ›ãƒ•ã‚¡ã‚¤ãƒ«\n"
+        "  -o <file>     å‡ºåŠ›ãƒ•ã‚¡ã‚¤ãƒ«\n"
+        "  -s <shift>    ç§»èª¿é‡ï¼ˆ-12ï½+12ï¼‰\n"
+        "  -p            Pure ãƒ¢ãƒ¼ãƒ‰ï¼ˆæ•´å½¢ãªã—ï¼‰\n"
+        "  -f            FMT  ãƒ¢ãƒ¼ãƒ‰ï¼ˆæ•´å½¢ã‚ã‚Šï¼‰\n"
+        "  -r            ç›¸å¯¾éŸ³åŸŸï¼ˆå…ˆé ­ oXã€ä»¥é™ < >ï¼‰\n"
+        "  -a            çµ¶å¯¾éŸ³åŸŸï¼ˆå…¨ã¦ oXï¼‰\n"
+        "  -d            D ãƒãƒ£ãƒ³ãƒãƒ«ç§»èª¿ï¼ˆãƒã‚¤ã‚ºchã‚‚ç§»èª¿ï¼‰\n"
+        "  -h            è©³ç´°ãƒ˜ãƒ«ãƒ—\n"
         "\n"
-        "‚±‚ÌƒvƒƒOƒ‰ƒ€‚Í NSF—p MML ˆÚ’²ƒc[ƒ‹‚Å‚·B\n"
-        "ƒwƒ‹ƒv‚Í -h | more ‚Å‚Ìƒy[ƒWo—Í‚ğ„§‚µ‚Ü‚·B\n"
+        "ã“ã®ãƒ—ãƒ­ã‚°ãƒ©ãƒ ã¯ NSFç”¨ MML ç§»èª¿ãƒ„ãƒ¼ãƒ«ã§ã™ã€‚\n"
+        "ãƒ˜ãƒ«ãƒ—ã¯ -h | more ã§ã®ãƒšãƒ¼ã‚¸å‡ºåŠ›ã‚’æ¨å¥¨ã—ã¾ã™ã€‚\n"
     );
 }
 
 void print_help_detail(void)
 {
     fprintf(stdout,
-        "g‚¢•û:"
+        "ä½¿ã„æ–¹:"
         "  mmltrc32 [options] <input.mml> [shift] [output.mml]\n"
         "\n"
-        "ƒIƒvƒVƒ‡ƒ“:        i‚·‚×‚ÄÈ—ª‰Âj\n"
-        "  -i <file>        “ü—Íƒtƒ@ƒCƒ‹‚ğw’è\n"
-        "  -o <file>        o—Íƒtƒ@ƒCƒ‹‚ğw’è\n"
-        "  -s <shift>       ˆÚ’²—Êi-12`+12j 0 ‚ÍˆÚ’²‚È‚µi+ ‚ÍÈ—ª‰Âj\n"
-        "  -p, --pure       Pure ƒ‚[ƒhi®Œ`‚È‚µj\n"
-        "  -f, --fmt        FMT  ƒ‚[ƒhi®Œ`‚ ‚èj\n"
-        "  -r, --relative   ‘Š‘Î‰¹ˆæw’èiæ“ª‚Ì‚İ oXAˆÈ~‚Í < >j\n"
-        "  -a, --absolute   â‘Î‰¹ˆæw’èi‚·‚×‚Ä oXj\n"
-        "  -d, --dch        D ƒ`ƒƒƒ“ƒlƒ‹ˆÚ’²iƒmƒCƒYch‚àˆÚ’²—Ê‚É‰‚¶‚ÄˆÚ’²j\n"
-        "  -h, --help       ‚±‚Ìƒwƒ‹ƒv‚ğo—Í\n"
-        "\n"
-//        "Šî–{“®ì:\n"
+        "ã‚ªãƒ—ã‚·ãƒ§ãƒ³:        ï¼ˆã™ã¹ã¦çœç•¥å¯ï¼‰\n"
+        "  -i <file>        å…¥åŠ›ãƒ•ã‚¡ã‚¤ãƒ«ã‚’æŒ‡å®š\n"
+        "  -o <file>        å‡ºåŠ›ãƒ•ã‚¡ã‚¤ãƒ«ã‚’æŒ‡å®š\n"
+        "  -s <shift>       ç§»èª¿é‡ï¼ˆ-12ï½+12ï¼‰ 0 ã¯ç§»èª¿ãªã—ï¼ˆ+ ã¯çœç•¥å¯ï¼‰\n"
+        "  -p, --pure       Pure ãƒ¢ãƒ¼ãƒ‰ï¼ˆæ•´å½¢ãªã—ï¼‰\n"
+        "  -f, --fmt        FMT  ãƒ¢ãƒ¼ãƒ‰ï¼ˆæ•´å½¢ã‚ã‚Šï¼‰\n"
+        "  -r, --relative   ç›¸å¯¾éŸ³åŸŸæŒ‡å®šï¼ˆå…ˆé ­ã®ã¿ oXã€ä»¥é™ã¯ < >ï¼‰\n"
+        "  -a, --absolute   çµ¶å¯¾éŸ³åŸŸæŒ‡å®šï¼ˆã™ã¹ã¦ oXï¼‰\n"
+        "  -d, --dch        D ãƒãƒ£ãƒ³ãƒãƒ«ç§»èª¿ï¼ˆãƒã‚¤ã‚ºchã‚‚ç§»èª¿é‡ã«å¿œã˜ã¦ç§»èª¿ï¼‰\n"
+        "  -h, --help       ã“ã®ãƒ˜ãƒ«ãƒ—ã‚’å‡ºåŠ›\n"
+        "ä¾‹:\n"
         "  mmltrc32 input.mml\n"
-        "         ¨ ‚»‚Ì‚Ü‚Ü  •W€o—Í  ‚Ö o—Í  iˆÚ’²ˆ—‚È‚µ‰æ–Êo—Íj\n"
+        "         â†’ ãã®ã¾ã¾  æ¨™æº–å‡ºåŠ›  ã¸ å‡ºåŠ›  ï¼ˆç§»èª¿å‡¦ç†ãªã—ç”»é¢å‡ºåŠ›ï¼‰\n"
         "\n"
         "  mmltrc32 input.mml output.mml\n"
-        "         ¨ ‚»‚Ì‚Ü‚Ü output.mml ‚Ö ƒRƒs[iˆÚ’²ˆ—‚È‚µ’PƒƒRƒs[j\n"
+        "         â†’ ãã®ã¾ã¾ output.mml ã¸ ã‚³ãƒ”ãƒ¼ï¼ˆç§»èª¿å‡¦ç†ãªã—å˜ç´”ã‚³ãƒ”ãƒ¼ï¼‰\n"
         "\n"
         "  mmltrc32 input.mml -s 0\n"
-        "         ¨ ˆÚ’²—Ê 0 ‚Å ˆ—Œ‹‰Ê‚ğ •W€o—Í‚Ö o—Íiƒ‚[ƒhÈ—ª‚Í Purej\n"
+        "         â†’ ç§»èª¿é‡ 0 ã§ å‡¦ç†çµæœã‚’ æ¨™æº–å‡ºåŠ›ã¸ å‡ºåŠ›ï¼ˆãƒ¢ãƒ¼ãƒ‰çœç•¥æ™‚ã¯ Pureï¼‰\n"
         "\n"
         "  mmltrc32 input.mml 5\n"
-        "         ¨ +5 ˆÚ’²‚µ‚Ä ˆ—Œ‹‰Ê‚ğ •W€o—Í‚Ö o—Íi-s ‚ÍÈ—ª‰Âj\n"
-        "\n\n"
-        "ƒ‚[ƒhà–¾:\n"
-        "¦ Pure / FMT ƒ‚[ƒh‚Å‚ÍA‰¹•„‚ÆƒIƒNƒ^[ƒu‚ğ\n"
-        "  Œ³‚Ì MML ‚ÌˆÓ}‚ğ•Û‚¿‚È‚ª‚ç©“®“I‚ÉU‚è’¼‚µ‚Ü‚·B\n"
+        "         â†’ +5 ç§»èª¿ã—ã¦ å‡¦ç†çµæœã‚’ æ¨™æº–å‡ºåŠ›ã¸ å‡ºåŠ›ï¼ˆ-s ã¯çœç•¥å¯ï¼‰\n"
         "\n"
-        "¦ -p / -f ‚Í ®Œ`•û®i Pure®Œ`‚È‚µ / FMT®Œ`‚ ‚è j‚ğw’è‚µ‚Ü‚·B\n"
-        "   -r / -a ‚Í ‰¹ˆæ•û®i ‘Š‘Î‰¹ˆæ [<>]  / â‘Î‰¹ˆæ [oX] j‚ğw’è‚µ‚Ü‚·B\n"
-        "   ‚±‚ê‚ç‚Í‘g‚İ‡‚í‚¹‚Äg—p‚Å‚«‚Ü‚·B\n"
+        "ãƒ¢ãƒ¼ãƒ‰èª¬æ˜:\n"
+        "â€» Pure / FMT ãƒ¢ãƒ¼ãƒ‰ã§ã¯ã€éŸ³ç¬¦ã¨ã‚ªã‚¯ã‚¿ãƒ¼ãƒ–ã‚’\n"
+        "   å…ƒã® MML ã®æ„å›³ã‚’ä¿ã¡ãªãŒã‚‰è‡ªå‹•çš„ã«æŒ¯ã‚Šç›´ã—ã¾ã™ã€‚\n"
         "\n"
-        "—á:\n"
+        "â€» -p / -f ã¯ æ•´å½¢æ–¹å¼ï¼ˆ Pureï¼æ•´å½¢ãªã— / FMTï¼æ•´å½¢ã‚ã‚Š ï¼‰ã‚’æŒ‡å®šã—ã¾ã™ã€‚\n"
+        "   -r / -a ã¯ éŸ³åŸŸæ–¹å¼ï¼ˆ ç›¸å¯¾éŸ³åŸŸ [<>]  / çµ¶å¯¾éŸ³åŸŸ [oX] ï¼‰ã‚’æŒ‡å®šã—ã¾ã™ã€‚\n"
+        "   ã“ã‚Œã‚‰ã¯çµ„ã¿åˆã‚ã›ã¦ä½¿ç”¨ã§ãã¾ã™ã€‚\n"
+        "\n"
+        "ä¾‹:\n"
         "  mmltrc32 input.mml -2 output.mml -p\n"
-        "         ¨ -2 ˆÚ’²‚µ‚Ä Purei®Œ`‚È‚µj‚Å ‰¹ˆæ‚Í ©“®U‚è’¼‚µ‚Å o—Í\n"
+        "         â†’ -2 ç§»èª¿ã—ã¦ Pureï¼ˆæ•´å½¢ãªã—ï¼‰ã§ éŸ³åŸŸã¯ è‡ªå‹•æŒ¯ã‚Šç›´ã—ã§ å‡ºåŠ›\n"
         "\n"
         "  mmltrc32 input.mml +3 output.mml -p -a\n"
-        "         ¨ +3 ˆÚ’²‚µ‚Ä Purei®Œ`‚È‚µj‚Å ‰¹ˆæ‚Í â‘Î‰¹ˆæ[oX]‚Å o—Í\n"
+        "         â†’ +3 ç§»èª¿ã—ã¦ Pureï¼ˆæ•´å½¢ãªã—ï¼‰ã§ éŸ³åŸŸã¯ çµ¶å¯¾éŸ³åŸŸ[oX]ã§ å‡ºåŠ›\n"
         "\n"
         "  mmltrc32 input.mml +7 output.mml -f\n"
-        "         ¨ +7 ˆÚ’²‚µ‚Ä FMT i®Œ`‚ ‚èj‚Å ‰¹ˆæ‚Í ©“®U‚è’¼‚µ‚Å o—Í\n"
+        "         â†’ +7 ç§»èª¿ã—ã¦ FMT ï¼ˆæ•´å½¢ã‚ã‚Šï¼‰ã§ éŸ³åŸŸã¯ è‡ªå‹•æŒ¯ã‚Šç›´ã—ã§ å‡ºåŠ›\n"
         "\n"
         "  mmltrc32 input.mml -5 output.mml -f -r -d\n"
-        "         ¨ -5 ˆÚ’²‚µ‚Ä FMTA‘Š‘Î‰¹ˆæ[<>]ADƒ`ƒƒƒ“ƒlƒ‹‚àˆÚ’²‚µ‚Ä o—Í\n"
-        "\n¦ -d ‚Å D ƒ`ƒƒƒ“ƒlƒ‹ˆÚ’²‚µ‚Ä‚à ƒIƒNƒ^[ƒu‚Í o0 ŒÅ’è‚Æ‚È‚è‚Ü‚·B"
+        "         â†’ -5 ç§»èª¿ã—ã¦ FMTã€ç›¸å¯¾éŸ³åŸŸ[<>]ã€Dãƒãƒ£ãƒ³ãƒãƒ«ã‚‚ç§»èª¿ã—ã¦ å‡ºåŠ›\n"
+        "\n"
+        "â€» -d ã§ D ãƒãƒ£ãƒ³ãƒãƒ«ç§»èª¿ã—ã¦ã‚‚ ã‚ªã‚¯ã‚¿ãƒ¼ãƒ–ã¯ o0 å›ºå®šã¨ãªã‚Šã¾ã™ã€‚\n"
     );
 }
 
@@ -110,7 +110,7 @@ int main(int argc, char* argv[])
 
     FILE* fp;
     size_t len;
-    size_t written; /* DEBUG—p */
+    size_t written; /* DEBUGç”¨ */
 
     int shift = 0;
     int shift_specified = 0;
@@ -119,7 +119,7 @@ int main(int argc, char* argv[])
     int pure_flag = 0;
     int rel_flag  = 0;
     int abs_flag  = 0;
-    int dch_flag  = 0; /* [NEW] -d / --dch ƒtƒ‰ƒO—pi‹Œ noise_flagj */
+    int dch_flag  = 0; /* [NEW] -d / --dch ãƒ•ãƒ©ã‚°ç”¨ï¼ˆæ—§ noise_flagï¼‰ */
 
     int i;
     int show_help = 0;
@@ -129,16 +129,16 @@ int main(int argc, char* argv[])
     int file_count = 0;
     int outlen;
 
-    /* ƒGƒ‰[Ú×\‘¢‘Ì‚ğéŒ¾ (C89€‹’‚Ì‚½‚ßŠÖ”æ“ªƒuƒƒbƒN‚É”z’u) */
+    /* ã‚¨ãƒ©ãƒ¼è©³ç´°æ§‹é€ ä½“ã‚’å®£è¨€ (C89æº–æ‹ ã®ãŸã‚é–¢æ•°å…ˆé ­ãƒ–ãƒ­ãƒƒã‚¯ã«é…ç½®) */
     MMLErrorInfo err_info;
 
-    /* ˆø”‚È‚µ ¨ ƒwƒ‹ƒv */
+    /* å¼•æ•°ãªã— â†’ ãƒ˜ãƒ«ãƒ— */
     if (argc < 2) {
         print_usage();
         return 1;
     }
 
-    /* ƒwƒ‹ƒvÅ—Dæ */
+    /* ãƒ˜ãƒ«ãƒ—æœ€å„ªå…ˆ */
     for (i = 1; i < argc; i++) {
         if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0) {
             show_help = 1;
@@ -151,13 +151,13 @@ int main(int argc, char* argv[])
     }
 
     /* ------------------------------------------------------------
-       -i / -o ‚ğæ‚Éˆ—
+       -i / -o ã‚’å…ˆã«å‡¦ç†
        ------------------------------------------------------------ */
     for (i = 1; i < argc; i++) {
 
         if (strcmp(argv[i], "-i") == 0) {
             if (i + 1 >= argc) {
-                fprintf(stderr, "ƒGƒ‰[: -i ‚ÌŒã‚Éƒtƒ@ƒCƒ‹–¼‚ğw’è‚µ‚Ä‚­‚¾‚³‚¢B\n");
+                fprintf(stderr, "ã‚¨ãƒ©ãƒ¼: -i ã®å¾Œã«ãƒ•ã‚¡ã‚¤ãƒ«åã‚’æŒ‡å®šã—ã¦ãã ã•ã„ã€‚\n");
                 return 1;
             }
             infile = argv[i + 1];
@@ -167,7 +167,7 @@ int main(int argc, char* argv[])
 
         if (strcmp(argv[i], "-o") == 0) {
             if (i + 1 >= argc) {
-                fprintf(stderr, "ƒGƒ‰[: -o ‚ÌŒã‚Éƒtƒ@ƒCƒ‹–¼‚ğw’è‚µ‚Ä‚­‚¾‚³‚¢B\n");
+                fprintf(stderr, "ã‚¨ãƒ©ãƒ¼: -o ã®å¾Œã«ãƒ•ã‚¡ã‚¤ãƒ«åã‚’æŒ‡å®šã—ã¦ãã ã•ã„ã€‚\n");
                 return 1;
             }
             outfile = argv[i + 1];
@@ -177,13 +177,13 @@ int main(int argc, char* argv[])
     }
 
     /* ------------------------------------------------------------
-       c‚è‚Ìˆø”‚ğˆ—
+       æ®‹ã‚Šã®å¼•æ•°ã‚’å‡¦ç†
        ------------------------------------------------------------ */
     for (i = 1; i < argc; i++) {
 
         if (argv[i][0] == '-') {
 
-            /* ‚·‚Å‚Éˆ—Ï‚İ‚Ì -i / -o ‚ÍƒXƒLƒbƒv */
+            /* ã™ã§ã«å‡¦ç†æ¸ˆã¿ã® -i / -o ã¯ã‚¹ã‚­ãƒƒãƒ— */
             if (strcmp(argv[i], "-i") == 0 || strcmp(argv[i], "-o") == 0) {
                 i++;
                 continue;
@@ -192,7 +192,7 @@ int main(int argc, char* argv[])
             /* Pure / FMT */
             if (strcmp(argv[i], "-p") == 0 || strcmp(argv[i], "--pure") == 0) {
                 if (fmt_flag) {
-                    fprintf(stderr, "ƒGƒ‰[: --pure ‚Æ --fmt ‚Í“¯‚Éw’è‚Å‚«‚Ü‚¹‚ñB\n");
+                    fprintf(stderr, "ã‚¨ãƒ©ãƒ¼: --pure ã¨ --fmt ã¯åŒæ™‚ã«æŒ‡å®šã§ãã¾ã›ã‚“ã€‚\n");
                     return 1;
                 }
                 pure_flag = 1;
@@ -201,7 +201,7 @@ int main(int argc, char* argv[])
 
             if (strcmp(argv[i], "-f") == 0 || strcmp(argv[i], "--fmt") == 0) {
                 if (pure_flag) {
-                    fprintf(stderr, "ƒGƒ‰[: --pure ‚Æ --fmt ‚Í“¯‚Éw’è‚Å‚«‚Ü‚¹‚ñB\n");
+                    fprintf(stderr, "ã‚¨ãƒ©ãƒ¼: --pure ã¨ --fmt ã¯åŒæ™‚ã«æŒ‡å®šã§ãã¾ã›ã‚“ã€‚\n");
                     return 1;
                 }
                 fmt_flag = 1;
@@ -211,7 +211,7 @@ int main(int argc, char* argv[])
             /* relative / absolute */
             if (strcmp(argv[i], "-r") == 0 || strcmp(argv[i], "--relative") == 0) {
                 if (abs_flag) {
-                    fprintf(stderr, "ƒGƒ‰[: -r ‚Æ -a ‚Í“¯‚Éw’è‚Å‚«‚Ü‚¹‚ñB\n");
+                    fprintf(stderr, "ã‚¨ãƒ©ãƒ¼: -r ã¨ -a ã¯åŒæ™‚ã«æŒ‡å®šã§ãã¾ã›ã‚“ã€‚\n");
                     return 1;
                 }
                 rel_flag = 1;
@@ -220,14 +220,14 @@ int main(int argc, char* argv[])
 
             if (strcmp(argv[i], "-a") == 0 || strcmp(argv[i], "--absolute") == 0) {
                 if (rel_flag) {
-                    fprintf(stderr, "ƒGƒ‰[: -r ‚Æ -a ‚Í“¯‚Éw’è‚Å‚«‚Ü‚¹‚ñB\n");
+                    fprintf(stderr, "ã‚¨ãƒ©ãƒ¼: -r ã¨ -a ã¯åŒæ™‚ã«æŒ‡å®šã§ãã¾ã›ã‚“ã€‚\n");
                     return 1;
                 }
                 abs_flag = 1;
                 continue;
             }
 
-            /* [NEW] -d / --dch (D chƒVƒtƒg) ƒIƒvƒVƒ‡ƒ“‚Ì‰ğÍ */
+            /* [NEW] -d / --dch (D chã‚·ãƒ•ãƒˆ) ã‚ªãƒ—ã‚·ãƒ§ãƒ³ã®è§£æ */
             if (strcmp(argv[i], "-d") == 0 || strcmp(argv[i], "--dch") == 0) {
                 dch_flag = 1;
                 continue;
@@ -239,22 +239,22 @@ int main(int argc, char* argv[])
                 char* endptr;
 
                 if (i + 1 >= argc) {
-                    fprintf(stderr, "ƒGƒ‰[: -s ‚ÌŒã‚ÉˆÚ’²—Ê‚ğw’è‚µ‚Ä‚­‚¾‚³‚¢B\n");
+                    fprintf(stderr, "ã‚¨ãƒ©ãƒ¼: -s ã®å¾Œã«ç§»èª¿é‡ã‚’æŒ‡å®šã—ã¦ãã ã•ã„ã€‚\n");
                     return 1;
                 }
 
                 if (shift_specified) {
-                    fprintf(stderr, "ƒGƒ‰[: shift ‚ª•¡”w’è‚³‚ê‚Ä‚¢‚Ü‚·B\n");
+                    fprintf(stderr, "ã‚¨ãƒ©ãƒ¼: shift ãŒè¤‡æ•°æŒ‡å®šã•ã‚Œã¦ã„ã¾ã™ã€‚\n");
                     return 1;
                 }
 
                 s = strtol(argv[i + 1], &endptr, 10);
                 if (*endptr != '\0') {
-                    fprintf(stderr, "ƒGƒ‰[: -s ‚ÌˆÚ’²—Ê‚Í®”‚Åw’è‚µ‚Ä‚­‚¾‚³‚¢B\n");
+                    fprintf(stderr, "ã‚¨ãƒ©ãƒ¼: -s ã®ç§»èª¿é‡ã¯æ•´æ•°ã§æŒ‡å®šã—ã¦ãã ã•ã„ã€‚\n");
                     return 1;
                 }
                 if (s < -12 || s > 12) {
-                    fprintf(stderr, "ƒGƒ‰[: shift ‚Í -12`+12 ‚Å‚·B\n");
+                    fprintf(stderr, "ã‚¨ãƒ©ãƒ¼: shift ã¯ -12ï½+12 ã§ã™ã€‚\n");
                     return 1;
                 }
 
@@ -264,16 +264,16 @@ int main(int argc, char* argv[])
                 continue;
             }
 
-            /* —‡‚Ì®”‚ğ shift ‚Æ‚µ‚Ä‰ğß */
+            /* è£¸ã®æ•´æ•°ã‚’ shift ã¨ã—ã¦è§£é‡ˆ */
             if (is_integer_arg(argv[i])) {
                 long s;
                 if (shift_specified) {
-                    fprintf(stderr, "ƒGƒ‰[: shift ‚ª•¡”w’è‚³‚ê‚Ä‚¢‚Ü‚·B\n");
+                    fprintf(stderr, "ã‚¨ãƒ©ãƒ¼: shift ãŒè¤‡æ•°æŒ‡å®šã•ã‚Œã¦ã„ã¾ã™ã€‚\n");
                     return 1;
                 }
                 s = strtol(argv[i], NULL, 10);
                 if (s < -12 || s > 12) {
-                    fprintf(stderr, "ƒGƒ‰[: shift ‚Í -12`+12 ‚Å‚·B\n");
+                    fprintf(stderr, "ã‚¨ãƒ©ãƒ¼: shift ã¯ -12ï½+12 ã§ã™ã€‚\n");
                     return 1;
                 }
                 shift = (int)s;
@@ -281,22 +281,22 @@ int main(int argc, char* argv[])
                 continue;
             }
 
-            fprintf(stderr, "ƒGƒ‰[: •s–¾‚ÈƒIƒvƒVƒ‡ƒ“‚Å‚·: %s\n", argv[i]);
+            fprintf(stderr, "ã‚¨ãƒ©ãƒ¼: ä¸æ˜ãªã‚ªãƒ—ã‚·ãƒ§ãƒ³ã§ã™: %s\n", argv[i]);
             return 1;
         }
 
-        /* ‚±‚±‚É—ˆ‚é‚Ì‚Í”ñƒIƒvƒVƒ‡ƒ“ˆø” */
+        /* ã“ã“ã«æ¥ã‚‹ã®ã¯éã‚ªãƒ—ã‚·ãƒ§ãƒ³å¼•æ•° */
 
-        /* —‡‚Ì®” ¨ shift */
+        /* è£¸ã®æ•´æ•° â†’ shift */
         if (is_integer_arg(argv[i])) {
             long s;
             if (shift_specified) {
-                fprintf(stderr, "ƒGƒ‰[: shift ‚ª•¡”w’è‚³‚ê‚Ä‚¢‚Ü‚·B\n");
+                fprintf(stderr, "ã‚¨ãƒ©ãƒ¼: shift ãŒè¤‡æ•°æŒ‡å®šã•ã‚Œã¦ã„ã¾ã™ã€‚\n");
                 return 1;
             }
             s = strtol(argv[i], NULL, 10);
             if (s < -12 || s > 12) {
-                fprintf(stderr, "ƒGƒ‰[: shift ‚Í -12`+12 ‚Å‚·B\n");
+                fprintf(stderr, "ã‚¨ãƒ©ãƒ¼: shift ã¯ -12ï½+12 ã§ã™ã€‚\n");
                 return 1;
             }
             shift = (int)s;
@@ -304,13 +304,13 @@ int main(int argc, char* argv[])
             continue;
         }
 
-        /* ƒtƒ@ƒCƒ‹Œó•â‚Æ‚µ‚Ä•Û‘¶ */
+        /* ãƒ•ã‚¡ã‚¤ãƒ«å€™è£œã¨ã—ã¦ä¿å­˜ */
         if (file_count < 16) {
             file_candidates[file_count++] = argv[i];
         }
     }
 
-    /* -i / -o ‚ª‚È‚¢ê‡‚ÍˆÃ–Ùƒ‹[ƒ‹‚Å‰ğß */
+    /* -i / -o ãŒãªã„å ´åˆã¯æš—é»™ãƒ«ãƒ¼ãƒ«ã§è§£é‡ˆ */
     if (!infile) {
         if (file_count >= 1) infile = file_candidates[0];
     }
@@ -320,31 +320,63 @@ int main(int argc, char* argv[])
     }
 
     if (!infile) {
-        fprintf(stderr, "ƒGƒ‰[: “ü—Íƒtƒ@ƒCƒ‹‚ªw’è‚³‚ê‚Ä‚¢‚Ü‚¹‚ñB\n");
+        fprintf(stderr, "ã‚¨ãƒ©ãƒ¼: å…¥åŠ›ãƒ•ã‚¡ã‚¤ãƒ«ãŒæŒ‡å®šã•ã‚Œã¦ã„ã¾ã›ã‚“ã€‚\n");
         print_usage();
         return 1;
     }
 
     if (outfile && strcmp(infile, outfile) == 0) {
-        fprintf(stderr, "ƒGƒ‰[: “ü—Í‚Æo—Í‚ª“¯‚¶‚Å‚·B\n");
+        fprintf(stderr, "ã‚¨ãƒ©ãƒ¼: å…¥åŠ›ã¨å‡ºåŠ›ãŒåŒã˜ã§ã™ã€‚\n");
         return 1;
     }
 
     /* ------------------------------------------------------------
-       “ü—Í“Ç‚İ‚İ
-       ------------------------------------------------------------ */
-    fp = fopen(infile, "r");
+       å…¥åŠ›èª­ã¿è¾¼ã¿ï¼ˆMAX_TEXT ã¨é€£å‹•ã—ãŸã‚µã‚¤ã‚ºãƒã‚§ãƒƒã‚¯ä»˜ãï¼‰
+    ------------------------------------------------------------ */
+    fp = fopen(infile, "rb");
     if (!fp) {
-        fprintf(stderr, "ƒGƒ‰[: ƒtƒ@ƒCƒ‹‚ğŠJ‚¯‚Ü‚¹‚ñ: %s\n", infile);
+        fprintf(stderr, "ã‚¨ãƒ©ãƒ¼: ãƒ•ã‚¡ã‚¤ãƒ«ã‚’é–‹ã‘ã¾ã›ã‚“: %s\n", infile);
         return 1;
     }
 
-    len = fread(text, 1, sizeof(text) - 1, fp);
+    /* ãƒ•ã‚¡ã‚¤ãƒ«ã‚µã‚¤ã‚ºãƒã‚§ãƒƒã‚¯ */
+    if (fseek(fp, 0, SEEK_END) != 0) {
+        fprintf(stderr, "ã‚¨ãƒ©ãƒ¼: ãƒ•ã‚¡ã‚¤ãƒ«ã‚µã‚¤ã‚ºã‚’å–å¾—ã§ãã¾ã›ã‚“: %s\n", infile);
+        fclose(fp);
+        return 1;
+    }
+
+    {
+        long fsize = ftell(fp);
+        if (fsize < 0) {
+            fprintf(stderr, "ã‚¨ãƒ©ãƒ¼: ãƒ•ã‚¡ã‚¤ãƒ«ã‚µã‚¤ã‚ºã‚’å–å¾—ã§ãã¾ã›ã‚“: %s\n", infile);
+            fclose(fp);
+            return 1;
+        }
+
+        if (fsize >= MAX_TEXT) {
+            fprintf(stderr,
+                "ã‚¨ãƒ©ãƒ¼: å…¥åŠ›ãƒ•ã‚¡ã‚¤ãƒ«ãŒå¤§ãã™ãã¾ã™ (%ld ãƒã‚¤ãƒˆ)ã€‚\n"
+                "        æœ€å¤§ %d ãƒã‚¤ãƒˆã¾ã§ã§ã™ã€‚\n",
+                fsize, MAX_TEXT - 1);
+            fclose(fp);
+            return 1;
+        }
+
+        if (fseek(fp, 0, SEEK_SET) != 0) {
+            fprintf(stderr, "ã‚¨ãƒ©ãƒ¼: ãƒ•ã‚¡ã‚¤ãƒ«ä½ç½®ã‚’å…ˆé ­ã«æˆ»ã›ã¾ã›ã‚“: %s\n", infile);
+            fclose(fp);
+            return 1;
+        }
+    }
+
+    /* å®Ÿéš›ã®èª­ã¿è¾¼ã¿ */
+    len = fread(text, 1, MAX_TEXT - 1, fp);
     fclose(fp);
     text[len] = '\0';
 
     /* ------------------------------------------------------------
-       ˆ—‚ª•K—v‚©‚Ç‚¤‚©”»’è (C89€‹’‚Ì‚½‚ß•Ï”éŒ¾‚ÍƒuƒƒbƒNæ“ª‚É)
+       å‡¦ç†ãŒå¿…è¦ã‹ã©ã†ã‹åˆ¤å®š (C89æº–æ‹ ã®ãŸã‚å¤‰æ•°å®£è¨€ã¯ãƒ–ãƒ­ãƒƒã‚¯å…ˆé ­ã«)
        ------------------------------------------------------------ */
     {
         int need_process = 0;
@@ -353,11 +385,11 @@ int main(int argc, char* argv[])
             need_process = 1;
         }
 
-        /* ˆ—•s—v ¨ ’PƒƒRƒs[ */
+        /* å‡¦ç†ä¸è¦ â†’ å˜ç´”ã‚³ãƒ”ãƒ¼ */
         if (!need_process) {
             outfp = outfile ? fopen(outfile, "w") : stdout;
             if (!outfp) {
-                fprintf(stderr, "ƒGƒ‰[: o—Íƒtƒ@ƒCƒ‹‚ğŠJ‚¯‚Ü‚¹‚ñB\n");
+                fprintf(stderr, "ã‚¨ãƒ©ãƒ¼: å‡ºåŠ›ãƒ•ã‚¡ã‚¤ãƒ«ã‚’é–‹ã‘ã¾ã›ã‚“ã€‚\n");
                 return 1;
             }
             fprintf(outfp, "%s", text);
@@ -366,19 +398,19 @@ int main(int argc, char* argv[])
         }
     }
 
-    /* shift –¢w’è‚È‚ç 0 ‚Æ‚İ‚È‚·iPure / FMT ‚ÌƒgƒŠƒK‚Æ‚µ‚Äˆµ‚¤j */
+    /* shift æœªæŒ‡å®šãªã‚‰ 0 ã¨ã¿ãªã™ï¼ˆPure / FMT ã®ãƒˆãƒªã‚¬ã¨ã—ã¦æ‰±ã†ï¼‰ */
     if (!shift_specified) {
         shift = 0;
     }
 
     /* ------------------------------------------------------------
-       mml_process() ŒÄ‚Ño‚µ (C89€‹’‚Ì‚½‚ß•Ï”éŒ¾‚ÍƒuƒƒbƒNæ“ª‚É)
+       mml_process() å‘¼ã³å‡ºã— (C89æº–æ‹ ã®ãŸã‚å¤‰æ•°å®£è¨€ã¯ãƒ–ãƒ­ãƒƒã‚¯å…ˆé ­ã«)
        ------------------------------------------------------------ */
     {
         int mode;
         int base_mode;
 
-        /* Pure / FMT ‚Ìƒx[ƒXƒ‚[ƒhŒˆ’è */
+        /* Pure / FMT ã®ãƒ™ãƒ¼ã‚¹ãƒ¢ãƒ¼ãƒ‰æ±ºå®š */
         if (fmt_flag) {
             base_mode = MODE_FMT;      /* 4 */
         } else {
@@ -387,43 +419,43 @@ int main(int argc, char* argv[])
 
         mode = base_mode;
 
-        /* Rel / Abs ƒrƒbƒg•t—^ */
+        /* Rel / Abs ãƒ“ãƒƒãƒˆä»˜ä¸ */
         if (rel_flag) {
-            mode |= 2;                 /* REL ƒrƒbƒg */
+            mode |= 2;                 /* REL ãƒ“ãƒƒãƒˆ */
         } else if (abs_flag) {
-            mode |= 1;                 /* ABS ƒrƒbƒg */
+            mode |= 1;                 /* ABS ãƒ“ãƒƒãƒˆ */
         }
 
-        /* D chƒVƒtƒgƒrƒbƒg(8) •t—^ */
+        /* D chã‚·ãƒ•ãƒˆãƒ“ãƒƒãƒˆ(8) ä»˜ä¸ */
         if (dch_flag) {
             mode |= 8;
         }
 
-        /* ‘æ6ˆø”‚É &err_info ‚ğ“n‚· */
+        /* ç¬¬6å¼•æ•°ã« &err_info ã‚’æ¸¡ã™ */
         outlen = mml_process(text, shift, mode, outbuf, sizeof(outbuf), &err_info);
     }
 
-    /* ƒIƒNƒ^[ƒuŒÀŠE“Ë”ji-10j“™‚ÌÚ×ƒGƒ‰[ƒnƒ“ƒhƒŠƒ“ƒO‚ğ“K—p */
+    /* ã‚ªã‚¯ã‚¿ãƒ¼ãƒ–é™ç•Œçªç ´ï¼ˆ-10ï¼‰ç­‰ã®è©³ç´°ã‚¨ãƒ©ãƒ¼ãƒãƒ³ãƒ‰ãƒªãƒ³ã‚°ã‚’é©ç”¨ */
     if (outlen < 0) {
         if (outlen == MML_ERR_OCTAVE_OUT_OF_RANGE) {
-            fprintf(stderr, "ƒGƒ‰[: ˆÚ’²‚É‚æ‚èŠe‰¹Œ¹‚ÌƒIƒNƒ^[ƒuŒÀŠE‚ğ“Ë”j‚µ‚Ü‚µ‚½B\n");
-            fprintf(stderr, "        ”­¶êŠ: ƒ`ƒƒƒ“ƒlƒ‹ '%c', %d s–Ú (ŒvZ’l: o%d)\n",
+            fprintf(stderr, "ã‚¨ãƒ©ãƒ¼: ç§»èª¿ã«ã‚ˆã‚Šå„éŸ³æºã®ã‚ªã‚¯ã‚¿ãƒ¼ãƒ–é™ç•Œã‚’çªç ´ã—ã¾ã—ãŸã€‚\n");
+            fprintf(stderr, "        ç™ºç”Ÿå ´æ‰€: ãƒãƒ£ãƒ³ãƒãƒ« '%c', %d è¡Œç›® (è¨ˆç®—å€¤: o%d)\n",
                     err_info.channel_char, err_info.line_number, err_info.calculated_value);
         } else {
-            fprintf(stderr, "ƒGƒ‰[: MML ˆ—‚É¸”s‚µ‚Ü‚µ‚½ (ƒR[ƒh %d)\n", outlen);
+            fprintf(stderr, "ã‚¨ãƒ©ãƒ¼: MML å‡¦ç†ã«å¤±æ•—ã—ã¾ã—ãŸ (ã‚³ãƒ¼ãƒ‰ %d)\n", outlen);
         }
         return 1;
     }
 
     if (outlen >= (int)sizeof(outbuf)) {
-        fprintf(stderr, "ƒGƒ‰[: o—Íƒoƒbƒtƒ@‚ª•s‘«‚µ‚Ä‚¢‚Ü‚·B\n");
+        fprintf(stderr, "ã‚¨ãƒ©ãƒ¼: å‡ºåŠ›ãƒãƒƒãƒ•ã‚¡ãŒä¸è¶³ã—ã¦ã„ã¾ã™ã€‚\n");
         return 1;
     }
     outbuf[outlen] = '\0';
 
     outfp = outfile ? fopen(outfile, "w") : stdout;
     if (!outfp) {
-        fprintf(stderr, "ƒGƒ‰[: o—Íƒtƒ@ƒCƒ‹‚ğŠJ‚¯‚Ü‚¹‚ñB\n");
+        fprintf(stderr, "ã‚¨ãƒ©ãƒ¼: å‡ºåŠ›ãƒ•ã‚¡ã‚¤ãƒ«ã‚’é–‹ã‘ã¾ã›ã‚“ã€‚\n");
         return 1;
     }
 
