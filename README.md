@@ -1,4 +1,4 @@
-# MML Transposer Win32 Console (MMLTRC32)
+# MML Transposer Win32 CUI (MMLTRC32)
 
 NSF 用 MML ファイル移調ツール「MML Transposer」の  
 Win32 コンソール版（CUI版）です。
