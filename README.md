@@ -1,82 +1,68 @@
 # MML Transposer Win32 CUI (MMLTRC32)
 
-NSF 用 MML ファイル移調ツール「MML Transposer」の  
-Win32 コンソール版（CUI版）です。
+A Win32 console edition of the MML Transposer tool.
+It transposes plain‑text MML source files used in NSF (NES Sound Format) music creation.
+This program does not process NSF data directly.
 
-## 対応環境
+This edition uses the 32‑bit engine `mmleng32.c`.
 
-- Windows 95 以降の Win32 コンソール環境
+## Supported Environment
 
-## エンジン構成
+- Windows 95 and later Win32 console environments
+- Verified on Windows 95 (Virtual PC 2007) and Windows 7 Professional
 
-- 32bit 版エンジン `mmleng32.c` を使用しています。
-
-## 使い方
+## Usage
 
 ```bash
 mmltrc32 [options] <input.mml> [shift] [output.mml]
 ```
 
-### オプション
+## Options
 
-- `-i <file>` 入力ファイル  
-- `-o <file>` 出力ファイル  
-- `-s <shift>` 移調量（-12～+12、0 は移調なし、`+` は省略可）  
-- `-p`, `--pure` Pure モード（整形なし）  
-- `-f`, `--fmt` FMT モード（整形あり）  
-- `-r`, `--relative` 相対音域指定（先頭のみ `oX`、以降は `<` `>`）  
-- `-a`, `--absolute` 絶対音域指定（すべて `oX`）  
-- `-d`, `--dch` D チャンネル移調（ノイズ ch も移調量に応じて移調）  
-- `-h`, `--help` ヘルプを表示
+- `-i <file>` — Specify input file.
+- `-o <file>` — Specify output file.
+- `-s <shift>` — Transpose amount (-12 to +12). `0` means no transpose. Leading `+` is optional.
+- `-p`, `--pure` — Pure mode (no formatting).
+- `-f`, `--fmt` — FMT mode (formatted output).
+- `-r`, `--relative` — Relative octave mode (`<>`).
+- `-a`, `--absolute` — Absolute octave mode (`oX`).
+- `-d`, `--dch` — Transpose D‑channel (noise channel included). Octave is fixed to `o0`.
+- `-h`, `--help` — Show help.
 
-### 使用例
+## Examples
 
 ```bash
 mmltrc32 input.mml
-# → そのまま標準出力へ出力（移調なし）
-
 mmltrc32 input.mml output.mml
-# → そのまま output.mml へコピー（移調なし）
-
 mmltrc32 input.mml -s 0
-# → 移調量 0 で処理（モード省略時は Pure）結果を標準出力へ
-
 mmltrc32 input.mml 5
-# → +5 移調して標準出力へ（-s は省略可）
-
 mmltrc32 input.mml -2 output.mml -p
-# → -2 移調 / Pure（整形なし）/ 音域は自動振り直し
-
 mmltrc32 input.mml +3 output.mml -p -a
-# → +3 移調 / Pure / 絶対音域[oX]
-
 mmltrc32 input.mml +7 output.mml -f
-# → +7 移調 / FMT（整形あり）/ 音域は自動振り直し
-
 mmltrc32 input.mml -5 output.mml -f -r -d
-# → -5 移調 / FMT / 相対音域[<>] / Dチャンネルも移調
 ```
 
-### モード説明
+## Mode Description
 
-- **Pure / FMT モード**  
-  元の MML の意図を保ちながら、音符とオクターブを自動的に振り直します。  
-  - `-p` / `--pure` 整形なし  
-  - `-f` / `--fmt` 整形あり  
+### Pure / FMT Mode
+Notes and octaves are automatically reassigned while preserving the original intent of the MML.
+- `-p` / `--pure` — no formatting  
+- `-f` / `--fmt` — formatted output
 
-- **音域指定**  
-  - `-r` / `--relative` 相対音域（`<>`）  
-  - `-a` / `--absolute` 絶対音域（`oX`）  
-  これらは `-p` / `-f` と組み合わせて使用できます。
+### Octave Mode
+- `-r` / `--relative` — relative octave (`<>`)  
+- `-a` / `--absolute` — absolute octave (`oX`)  
+These can be combined with Pure / FMT modes.
 
-- **D チャンネル移調**  
-  - `-d` / `--dch` を指定すると、ノイズチャンネルも移調します。  
-  - オクターブは `o0` 固定です。
+### D‑Channel Transpose
+- `-d` / `--dch` — transposes the D‑channel (noise channel included).  
+- The D‑channel octave is always fixed to `o0`.
 
-## 備考
+## Notes
 
-このプログラムは NSF 用 MML 移調ツールです。  
-ヘルプは `mmltrc32 -h | more` でページ送りしながら読むことを推奨します。
+- This program transposes MML source code used for NSF (NES Sound Format) music creation.
+- For detailed help, use:  
+  `mmltrc32 -h | more`
 
-このコードは全て Copilot を活用して作成しています。  
-予期せぬ不具合はご容赦ください。
+All source code in this project was created with the assistance of Copilot.
+Unexpected issues may occur.
