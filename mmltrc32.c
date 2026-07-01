@@ -1,16 +1,16 @@
-/* ============================================================
- * mmltrc32.c  (MML Transposer コンソール アプリ 32bit CUI版)
- * ============================================================ */
+/* ==================================================================
+ * mmltrc32.c  (MML Transposer Win32 CUI - Win32 Console Application)
+ * ================================================================== */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "mmleng32.h"		//32bitヘッダ
+#include "mmleng32.h"
 
 char text[MAX_TEXT];
 char outbuf[MAX_OUT];
 
-/* 整数判定 */
+/* Check if the argument is an integer (with optional +/- sign) */
 int is_integer_arg(const char* s)
 {
     int i = 0;
@@ -28,28 +28,109 @@ int is_integer_arg(const char* s)
     return 1;
 }
 
+/* Short usage help */
 void print_usage(void) {
     fprintf(stdout,
-        "使い方:\n"
+        "Usage:\n"
         "  mmltrc32 [options] <input.mml> [shift] [output.mml]\n"
         "\n"
-        "オプション:\n"
-        "  -i <file>     入力ファイル\n"
-        "  -o <file>     出力ファイル\n"
-        "  -s <shift>    移調量（-12～+12）\n"
-        "  -p            Pure モード（整形なし）\n"
-        "  -f            FMT  モード（整形あり）\n"
-        "  -r            相対音域（先頭 oX、以降 < >）\n"
-        "  -a            絶対音域（全て oX）\n"
-        "  -d            D チャンネル移調（ノイズchも移調）\n"
-        "  -h            詳細ヘルプ\n"
+        "Options:           (all optional)\n"
+        "  -i <file>        Specify input file\n"
+        "  -o <file>        Specify output file\n"
+        "  -s <shift>       Transpose amount (-12 to +12)\n"
+        "  -p, --pure       Pure mode (no formatting)\n"
+        "  -f, --fmt        FMT mode (formatted output)\n"
+        "  -r, --relative   Relative octave mode\n"
+        "  -a, --absolute   Absolute octave mode\n"
+        "  -d, --dch        Transpose D-channel (noise channel included)\n"
         "\n"
-        "このプログラムは NSF用 MML 移調ツールです。\n"
-        "ヘルプは -h | more でのページ出力を推奨します。\n"
+        "== MML Transposer Win32 CUI - Win32 Console Application ==\n"
+        "\n"
+        "This program transposes MML source code written for NSF music.\n"
+        "It does not handle NSF files.\n"
+        "\n"
+        "For detailed help, use:\n"
+        "  mmltrc32 -h | more    English  help (/h, /? also supported)\n"
+        "  mmltrc32 -hjp | more  Japanese help (/hjp also supported)\n"
     );
 }
 
+/* Detailed help (for use with -h, /h, /?) */
 void print_help_detail(void)
+{
+    fprintf(stdout,
+        "Usage:"
+        "  mmltrc32 [options] <input.mml> [shift] [output.mml]\n"
+        "\n"
+        "Options:           (all optional)\n"
+        "  -i <file>        Specify input file\n"
+        "  -o <file>        Specify output file\n"
+        "  -s <shift>       Transpose amount (-12 to +12).\n"
+        "                   0 means no transpose (leading '+' is optional).\n"
+        "  -p, --pure       Pure mode (no formatting)\n"
+        "  -f, --fmt        FMT mode (formatted output)\n"
+        "  -r, --relative   Relative octave mode\n"
+        "                   (first note uses oX, subsequent notes use < >)\n"
+        "  -a, --absolute   Absolute octave mode (all notes use oX)\n"
+        "  -d, --dch        Transpose D-channel\n"
+        "                   (noise channel is also transposed accordingly)\n"
+        "  -h, --help       Show this help (/h, /? also supported)\n"
+        "\n"
+        "Examples:\n"
+        "  mmltrc32 input.mml\n"
+        "         -> Output directly to standard output\n"
+        "            (no transpose, just display)\n"
+        "\n"
+        "  mmltrc32 input.mml output.mml\n"
+        "         -> Copy input.mml to output.mml\n"
+        "            (no transpose, simple file copy)\n"
+        "\n"
+        "  mmltrc32 input.mml -s 0\n"
+        "         -> Process with shift = 0 and output to standard output\n"
+        "            (when mode is omitted, Pure mode is used)\n"
+        "\n"
+        "  mmltrc32 input.mml 5\n"
+        "         -> Transpose by +5 and output to standard output\n"
+        "            (-s can be omitted when specifying a bare integer)\n"
+        "\n"
+        "Mode description:\n"
+        "  In Pure / FMT modes, notes and octaves are automatically\n"
+        "  reassigned while preserving the original intent of the MML.\n"
+        "\n"
+        "  -p / -f specify formatting style:\n"
+        "     Pure = no formatting\n"
+        "     FMT  = formatted output\n"
+        "\n"
+        "  -r / -a specify octave mode:\n"
+        "     Relative octave [<>]\n"
+        "     Absolute octave [oX]\n"
+        "  These can be combined with Pure / FMT.\n"
+        "\n\n"
+        "Examples:\n"
+        "  mmltrc32 input.mml -2 output.mml -p\n"
+        "         -> Transpose by -2, Pure mode (no formatting),\n"
+        "            octaves are automatically adjusted\n"
+        "\n"
+        "  mmltrc32 input.mml +3 output.mml -p -a\n"
+        "         -> Transpose by +3, Pure mode (no formatting),\n"
+        "            octaves are output in absolute form [oX]\n"
+        "\n"
+        "  mmltrc32 input.mml +7 output.mml -f\n"
+        "         -> Transpose by +7, FMT mode (formatted),\n"
+        "            octaves are automatically adjusted\n"
+        "\n"
+        "  mmltrc32 input.mml -5 output.mml -f -r -d\n"
+        "         -> Transpose by -5, FMT mode, relative octave [<>],\n"
+        "            and D-channel is also transposed\n"
+        "\n"
+        "Note:\n"
+        "  Even when using -d to transpose the D-channel,\n"
+        "  its octave is fixed to o0.\n"
+    );
+}
+
+// Display Japanese help (-hjp, /hjp)
+void print_help_jp(void)
 {
     fprintf(stdout,
         "使い方:"
@@ -64,7 +145,7 @@ void print_help_detail(void)
         "  -r, --relative   相対音域指定（先頭のみ oX、以降は < >）\n"
         "  -a, --absolute   絶対音域指定（すべて oX）\n"
         "  -d, --dch        D チャンネル移調（ノイズchも移調量に応じて移調）\n"
-        "  -h, --help       このヘルプを出力\n"
+        "  -h, --help       英語ヘルプを出力（日本語ヘルプは -hjp, /hjp）\n"
         "例:\n"
         "  mmltrc32 input.mml\n"
         "         → そのまま  標準出力  へ 出力  （移調処理なし画面出力）\n"
@@ -110,7 +191,7 @@ int main(int argc, char* argv[])
 
     FILE* fp;
     size_t len;
-    size_t written; /* DEBUG用 */
+    size_t written; /* for debug / completeness */
 
     int shift = 0;
     int shift_specified = 0;
@@ -119,7 +200,7 @@ int main(int argc, char* argv[])
     int pure_flag = 0;
     int rel_flag  = 0;
     int abs_flag  = 0;
-    int dch_flag  = 0; /* [NEW] -d / --dch フラグ用（旧 noise_flag） */
+    int dch_flag  = 0; /* [NEW] flag for -d / --dch (formerly noise_flag) */
 
     int i;
     int show_help = 0;
@@ -129,35 +210,47 @@ int main(int argc, char* argv[])
     int file_count = 0;
     int outlen;
 
-    /* エラー詳細構造体を宣言 (C89準拠のため関数先頭ブロックに配置) */
+    /* Error detail structure (C89: must be at top of block) */
     MMLErrorInfo err_info;
 
-    /* 引数なし → ヘルプ */
+    /* No arguments -> show usage */
     if (argc < 2) {
         print_usage();
         return 1;
     }
 
-    /* ヘルプ最優先 */
+    /* Help has highest priority (also supports DOS-style /h /? /hjp) */
     for (i = 1; i < argc; i++) {
-        if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0) {
+        if (strcmp(argv[i], "-hjp") == 0 ||
+            strcmp(argv[i], "/hjp") == 0) {
+            show_help = 2;
+            break;
+        }
+        if (strcmp(argv[i], "-h") == 0 ||
+            strcmp(argv[i], "--help") == 0 ||
+            strcmp(argv[i], "/h") == 0 ||
+            strcmp(argv[i], "/?") == 0) {
             show_help = 1;
             break;
         }
     }
-    if (show_help) {
+    if (show_help == 1) {
         print_help_detail();
+        return 0;
+    }
+    if (show_help == 2){
+        print_help_jp();
         return 0;
     }
 
     /* ------------------------------------------------------------
-       -i / -o を先に処理
+       Process -i / -o first
        ------------------------------------------------------------ */
     for (i = 1; i < argc; i++) {
 
         if (strcmp(argv[i], "-i") == 0) {
             if (i + 1 >= argc) {
-                fprintf(stderr, "エラー: -i の後にファイル名を指定してください。\n");
+                fprintf(stderr, "Error: Please specify a file name after -i.\n");
                 return 1;
             }
             infile = argv[i + 1];
@@ -167,7 +260,7 @@ int main(int argc, char* argv[])
 
         if (strcmp(argv[i], "-o") == 0) {
             if (i + 1 >= argc) {
-                fprintf(stderr, "エラー: -o の後にファイル名を指定してください。\n");
+                fprintf(stderr, "Error: Please specify a file name after -o.\n");
                 return 1;
             }
             outfile = argv[i + 1];
@@ -177,13 +270,13 @@ int main(int argc, char* argv[])
     }
 
     /* ------------------------------------------------------------
-       残りの引数を処理
+       Process remaining arguments
        ------------------------------------------------------------ */
     for (i = 1; i < argc; i++) {
 
         if (argv[i][0] == '-') {
 
-            /* すでに処理済みの -i / -o はスキップ */
+            /* Skip already processed -i / -o and their arguments */
             if (strcmp(argv[i], "-i") == 0 || strcmp(argv[i], "-o") == 0) {
                 i++;
                 continue;
@@ -192,7 +285,7 @@ int main(int argc, char* argv[])
             /* Pure / FMT */
             if (strcmp(argv[i], "-p") == 0 || strcmp(argv[i], "--pure") == 0) {
                 if (fmt_flag) {
-                    fprintf(stderr, "エラー: --pure と --fmt は同時に指定できません。\n");
+                    fprintf(stderr, "Error: --pure and --fmt cannot be used together.\n");
                     return 1;
                 }
                 pure_flag = 1;
@@ -201,7 +294,7 @@ int main(int argc, char* argv[])
 
             if (strcmp(argv[i], "-f") == 0 || strcmp(argv[i], "--fmt") == 0) {
                 if (pure_flag) {
-                    fprintf(stderr, "エラー: --pure と --fmt は同時に指定できません。\n");
+                    fprintf(stderr, "Error: --pure and --fmt cannot be used together.\n");
                     return 1;
                 }
                 fmt_flag = 1;
@@ -211,7 +304,7 @@ int main(int argc, char* argv[])
             /* relative / absolute */
             if (strcmp(argv[i], "-r") == 0 || strcmp(argv[i], "--relative") == 0) {
                 if (abs_flag) {
-                    fprintf(stderr, "エラー: -r と -a は同時に指定できません。\n");
+                    fprintf(stderr, "Error: -r and -a cannot be used together.\n");
                     return 1;
                 }
                 rel_flag = 1;
@@ -220,14 +313,14 @@ int main(int argc, char* argv[])
 
             if (strcmp(argv[i], "-a") == 0 || strcmp(argv[i], "--absolute") == 0) {
                 if (rel_flag) {
-                    fprintf(stderr, "エラー: -r と -a は同時に指定できません。\n");
+                    fprintf(stderr, "Error: -r and -a cannot be used together.\n");
                     return 1;
                 }
                 abs_flag = 1;
                 continue;
             }
 
-            /* [NEW] -d / --dch (D chシフト) オプションの解析 */
+            /* [NEW] -d / --dch (D-channel shift) */
             if (strcmp(argv[i], "-d") == 0 || strcmp(argv[i], "--dch") == 0) {
                 dch_flag = 1;
                 continue;
@@ -239,22 +332,22 @@ int main(int argc, char* argv[])
                 char* endptr;
 
                 if (i + 1 >= argc) {
-                    fprintf(stderr, "エラー: -s の後に移調量を指定してください。\n");
+                    fprintf(stderr, "Error: Please specify a value after -s.\n");
                     return 1;
                 }
 
                 if (shift_specified) {
-                    fprintf(stderr, "エラー: shift が複数指定されています。\n");
+                    fprintf(stderr, "Error: Shift value specified more than once.\n");
                     return 1;
                 }
 
                 s = strtol(argv[i + 1], &endptr, 10);
                 if (*endptr != '\0') {
-                    fprintf(stderr, "エラー: -s の移調量は整数で指定してください。\n");
+                    fprintf(stderr, "Error: Shift value must be an integer.\n");
                     return 1;
                 }
                 if (s < -12 || s > 12) {
-                    fprintf(stderr, "エラー: shift は -12～+12 です。\n");
+                    fprintf(stderr, "Error: Shift value must be between -12 and +12.\n");
                     return 1;
                 }
 
@@ -264,16 +357,16 @@ int main(int argc, char* argv[])
                 continue;
             }
 
-            /* 裸の整数を shift として解釈 */
+            /* Bare integer treated as shift */
             if (is_integer_arg(argv[i])) {
                 long s;
                 if (shift_specified) {
-                    fprintf(stderr, "エラー: shift が複数指定されています。\n");
+                    fprintf(stderr, "Error: Shift value specified more than once.\n");
                     return 1;
                 }
                 s = strtol(argv[i], NULL, 10);
                 if (s < -12 || s > 12) {
-                    fprintf(stderr, "エラー: shift は -12～+12 です。\n");
+                    fprintf(stderr, "Error: Shift value must be between -12 and +12.\n");
                     return 1;
                 }
                 shift = (int)s;
@@ -281,22 +374,22 @@ int main(int argc, char* argv[])
                 continue;
             }
 
-            fprintf(stderr, "エラー: 不明なオプションです: %s\n", argv[i]);
+            fprintf(stderr, "Error: Unknown option: %s\n", argv[i]);
             return 1;
         }
 
-        /* ここに来るのは非オプション引数 */
+        /* Non-option arguments */
 
-        /* 裸の整数 → shift */
+        /* Bare integer -> shift */
         if (is_integer_arg(argv[i])) {
             long s;
             if (shift_specified) {
-                fprintf(stderr, "エラー: shift が複数指定されています。\n");
+                fprintf(stderr, "Error: Shift value specified more than once.\n");
                 return 1;
             }
             s = strtol(argv[i], NULL, 10);
             if (s < -12 || s > 12) {
-                fprintf(stderr, "エラー: shift は -12～+12 です。\n");
+                fprintf(stderr, "Error: Shift value must be between -12 and +12.\n");
                 return 1;
             }
             shift = (int)s;
@@ -304,13 +397,13 @@ int main(int argc, char* argv[])
             continue;
         }
 
-        /* ファイル候補として保存 */
+        /* Save as file candidate */
         if (file_count < 16) {
             file_candidates[file_count++] = argv[i];
         }
     }
 
-    /* -i / -o がない場合は暗黙ルールで解釈 */
+    /* If -i / -o are not specified, infer from remaining arguments */
     if (!infile) {
         if (file_count >= 1) infile = file_candidates[0];
     }
@@ -320,28 +413,28 @@ int main(int argc, char* argv[])
     }
 
     if (!infile) {
-        fprintf(stderr, "エラー: 入力ファイルが指定されていません。\n");
+        fprintf(stderr, "Error: No input file specified.\n");
         print_usage();
         return 1;
     }
 
     if (outfile && strcmp(infile, outfile) == 0) {
-        fprintf(stderr, "エラー: 入力と出力が同じです。\n");
+        fprintf(stderr, "Error: Input and output files are the same.\n");
         return 1;
     }
 
     /* ------------------------------------------------------------
-       入力読み込み（MAX_TEXT と連動したサイズチェック付き）
-    ------------------------------------------------------------ */
+       Read input (with size check tied to MAX_TEXT)
+       ------------------------------------------------------------ */
     fp = fopen(infile, "rb");
     if (!fp) {
-        fprintf(stderr, "エラー: ファイルを開けません: %s\n", infile);
+        fprintf(stderr, "Error: Cannot open file: %s\n", infile);
         return 1;
     }
 
-    /* ファイルサイズチェック */
+    /* File size check */
     if (fseek(fp, 0, SEEK_END) != 0) {
-        fprintf(stderr, "エラー: ファイルサイズを取得できません: %s\n", infile);
+        fprintf(stderr, "Error: Cannot get file size: %s\n", infile);
         fclose(fp);
         return 1;
     }
@@ -349,34 +442,35 @@ int main(int argc, char* argv[])
     {
         long fsize = ftell(fp);
         if (fsize < 0) {
-            fprintf(stderr, "エラー: ファイルサイズを取得できません: %s\n", infile);
+            fprintf(stderr, "Error: Cannot get file size: %s\n", infile);
             fclose(fp);
             return 1;
         }
 
         if (fsize >= MAX_TEXT) {
             fprintf(stderr,
-                "エラー: 入力ファイルが大きすぎます (%ld バイト)。\n"
-                "        最大 %d バイトまでです。\n",
+                "Error: Input file is too large (%ld bytes).\n"
+                "       Maximum size is %d bytes.\n",
                 fsize, MAX_TEXT - 1);
             fclose(fp);
             return 1;
         }
 
         if (fseek(fp, 0, SEEK_SET) != 0) {
-            fprintf(stderr, "エラー: ファイル位置を先頭に戻せません: %s\n", infile);
+            fprintf(stderr, "Error: Cannot reset file position: %s\n", infile);
             fclose(fp);
             return 1;
         }
     }
 
-    /* 実際の読み込み */
+    /* Actual read */
     len = fread(text, 1, MAX_TEXT - 1, fp);
     fclose(fp);
     text[len] = '\0';
 
     /* ------------------------------------------------------------
-       処理が必要かどうか判定 (C89準拠のため変数宣言はブロック先頭に)
+       Decide whether processing is needed
+       (C89: variable declarations at block start)
        ------------------------------------------------------------ */
     {
         int need_process = 0;
@@ -385,11 +479,11 @@ int main(int argc, char* argv[])
             need_process = 1;
         }
 
-        /* 処理不要 → 単純コピー */
+        /* No processing needed -> simple copy */
         if (!need_process) {
             outfp = outfile ? fopen(outfile, "w") : stdout;
             if (!outfp) {
-                fprintf(stderr, "エラー: 出力ファイルを開けません。\n");
+                fprintf(stderr, "Error: Cannot open output file.\n");
                 return 1;
             }
             fprintf(outfp, "%s", text);
@@ -398,19 +492,20 @@ int main(int argc, char* argv[])
         }
     }
 
-    /* shift 未指定なら 0 とみなす（Pure / FMT のトリガとして扱う） */
+    /* If shift is not specified, treat as 0 (used as trigger for Pure/FMT) */
     if (!shift_specified) {
         shift = 0;
     }
 
     /* ------------------------------------------------------------
-       mml_process() 呼び出し (C89準拠のため変数宣言はブロック先頭に)
+       Call mml_process()
+       (C89: variable declarations at block start)
        ------------------------------------------------------------ */
     {
         int mode;
         int base_mode;
 
-        /* Pure / FMT のベースモード決定 */
+        /* Decide base mode: Pure / FMT */
         if (fmt_flag) {
             base_mode = MODE_FMT;      /* 4 */
         } else {
@@ -419,47 +514,48 @@ int main(int argc, char* argv[])
 
         mode = base_mode;
 
-        /* Rel / Abs ビット付与 */
+        /* Add Rel / Abs bits */
         if (rel_flag) {
-            mode |= 2;                 /* REL ビット */
+            mode |= 2;                 /* REL bit */
         } else if (abs_flag) {
-            mode |= 1;                 /* ABS ビット */
+            mode |= 1;                 /* ABS bit */
         }
 
-        /* D chシフトビット(8) 付与 */
+        /* Add D-channel shift bit (8) */
         if (dch_flag) {
             mode |= 8;
         }
 
-        /* 第6引数に &err_info を渡す */
+        /* Pass &err_info as the 6th argument */
         outlen = mml_process(text, shift, mode, outbuf, sizeof(outbuf), &err_info);
     }
 
-    /* オクターブ限界突破（-10）等の詳細エラーハンドリングを適用 */
+    /* Detailed error handling for octave out-of-range (-10), etc. */
     if (outlen < 0) {
         if (outlen == MML_ERR_OCTAVE_OUT_OF_RANGE) {
-            fprintf(stderr, "エラー: 移調により各音源のオクターブ限界を突破しました。\n");
-            fprintf(stderr, "        発生場所: チャンネル '%c', %d 行目 (計算値: o%d)\n",
+            fprintf(stderr, "Error: Octave limit exceeded during transpose.\n");
+            fprintf(stderr, "       Location: channel '%c', line %d (calculated: o%d)\n",
                     err_info.channel_char, err_info.line_number, err_info.calculated_value);
         } else {
-            fprintf(stderr, "エラー: MML 処理に失敗しました (コード %d)\n", outlen);
+            fprintf(stderr, "Error: MML processing failed (code %d)\n", outlen);
         }
         return 1;
     }
 
     if (outlen >= (int)sizeof(outbuf)) {
-        fprintf(stderr, "エラー: 出力バッファが不足しています。\n");
+        fprintf(stderr, "Error: Output buffer is too small.\n");
         return 1;
     }
     outbuf[outlen] = '\0';
 
     outfp = outfile ? fopen(outfile, "w") : stdout;
     if (!outfp) {
-        fprintf(stderr, "エラー: 出力ファイルを開けません。\n");
+        fprintf(stderr, "Error: Cannot open output file.\n");
         return 1;
     }
 
     written = fwrite(outbuf, 1, outlen, outfp);
+    (void)written; /* suppress unused warning if not used */
 
     if (outfile) {
         fclose(outfp);
