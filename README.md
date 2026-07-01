@@ -27,7 +27,15 @@ mmltrc32 [options] <input.mml> [shift] [output.mml]
 - `-r`, `--relative` — Relative octave mode (`<>`).
 - `-a`, `--absolute` — Absolute octave mode (`oX`).
 - `-d`, `--dch` — Transpose D‑channel (noise channel included). Octave is fixed to `o0`.
-- `-h`, `--help` — Show help.
+- `-h`, `--help` — Show English help.
+- `-hjp` — Show Japanese help.
+
+## Notes
+
+- This program transposes MML source code used for NSF (NES Sound Format) music creation.
+- For detailed help, use:
+  - `mmltrc32 -h | more` — English help
+  - `mmltrc32 -hjp | more` — Japanese help
 
 ## Examples
 
